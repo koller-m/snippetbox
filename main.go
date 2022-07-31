@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 // Define home handler function
@@ -24,7 +26,18 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 // Add snippetView handler function
 func snippetView(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Display a specific snippet..."))
+	// Extract the value of the id param from query string
+	// Convert it to int using strconv.Atoi()
+	// If it can't be converted or value is less than 1, return 404
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	// Use fmt.Fprintf() to interpolate the id value with our response
+	// and write it to http.ResponseWriter
+	fmt.Fprintf(w, "Display a specific snippet with the ID %d...", id)
 }
 
 // Add snippetCreate handler function
