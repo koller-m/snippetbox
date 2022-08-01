@@ -22,19 +22,25 @@ func home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Use template.ParseFiles() to read template file into template set
+	// Init a slice containing the paths to two files
+	// The file containing the base template must be first
+	files := []string{
+		"./ui/html/base.tmpl.html",
+		"./ui/html/pages/home.tmpl.html",
+	}
+
+	// Use template.ParseFiles() to read the files and store the templates
 	// Log error with http.Error() to send a generic 500 Internal Server Error
-	ts, err := template.ParseFiles("./ui/html/pages/home.tmpl.html")
+	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
 
-	// Use Execute() method on template set to write template content as
-	// Response body
-	// The last param of Execute() represents any dynamic data we want to pass in
-	err = ts.Execute(w, nil)
+	// Use ExecuteTemplate() to write the content of the "base" template
+	// As the response body
+	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, "Internal Server Error", 500)
