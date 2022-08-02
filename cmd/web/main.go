@@ -1,11 +1,20 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 )
 
 func main() {
+	// Define a command-line flag "addr"
+	addr := flag.String("addr", ":4000", "HTTP network address")
+
+	// Parse the command-line flag with flag.Parse()
+	// This reads in the command-line flag and assigns it to addr
+	// Must be called before the addr variable is used
+	flag.Parse()
+
 	// Use http.NewServeMux() to init new servemux
 	// Register the home func as the handler for the "/" URL pattern
 	mux := http.NewServeMux()
@@ -21,13 +30,10 @@ func main() {
 	mux.HandleFunc("/snippet/view", snippetView)
 	mux.HandleFunc("/snippet/create", snippetCreate)
 
-	// Use http.ListenAndServe() to start a web server
-	// Pass two params
-	// TCP network address (":4000")
-	// And the servemux we just created
-	// If http.ListenAndServe() returns an error
-	// We use log.Fatal() to log the error and exit
-	log.Print("Starting server on :4000")
-	err := http.ListenAndServe(":4000", mux)
+	// The value returned from flag.String() is a pointer to the flag value
+	// NOT the value itself
+	// Dereference the pointer with the * symbol
+	log.Printf("Starting server on %s", *addr)
+	err := http.ListenAndServe(*addr, mux)
 	log.Fatal(err)
 }
