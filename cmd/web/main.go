@@ -7,6 +7,12 @@ import (
 	"os"
 )
 
+// Create application struct to hold application-wide dependencies
+type application struct {
+	errorLog *log.Logger
+	infoLog  *log.Logger
+}
+
 func main() {
 	// Define a command-line flag "addr"
 	addr := flag.String("addr", ":4000", "HTTP network address")
@@ -25,6 +31,12 @@ func main() {
 	// Create a logger for writing error messages
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
+	// Init new instance of our application struct
+	app := &application{
+		errorLog: errorLog,
+		infoLog:  infoLog,
+	}
+
 	// Use http.NewServeMux() to init new servemux
 	// Register the home func as the handler for the "/" URL pattern
 	mux := http.NewServeMux()
@@ -36,9 +48,9 @@ func main() {
 	// All URL paths that start with "/static/"
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet/view", snippetView)
-	mux.HandleFunc("/snippet/create", snippetCreate)
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet/view", app.snippetView)
+	mux.HandleFunc("/snippet/create", app.snippetCreate)
 
 	// Init a new http.Server struct
 	// ErrorLog now uses the custom errorLog logger
