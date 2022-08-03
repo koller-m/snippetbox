@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -14,6 +15,15 @@ func main() {
 	// This reads in the command-line flag and assigns it to addr
 	// Must be called before the addr variable is used
 	flag.Parse()
+
+	// Create a logger for writing information messages. This takes three params
+	// The destination to write the logs to, a string prefix for message
+	// And flags to indicate what additional information to include
+	// Flags are joined using the | operator
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+
+	// Create a logger for writing error messages
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	// Use http.NewServeMux() to init new servemux
 	// Register the home func as the handler for the "/" URL pattern
@@ -30,10 +40,16 @@ func main() {
 	mux.HandleFunc("/snippet/view", snippetView)
 	mux.HandleFunc("/snippet/create", snippetCreate)
 
-	// The value returned from flag.String() is a pointer to the flag value
-	// NOT the value itself
-	// Dereference the pointer with the * symbol
-	log.Printf("Starting server on %s", *addr)
-	err := http.ListenAndServe(*addr, mux)
-	log.Fatal(err)
+	// Init a new http.Server struct
+	// ErrorLog now uses the custom errorLog logger
+	srv := &http.Server{
+		Addr:     *addr,
+		ErrorLog: errorLog,
+		Handler:  mux,
+	}
+
+	infoLog.Printf("Starting server on %s", *addr)
+	// Call ListenAndServe() on new http.Server struct
+	err := srv.ListenAndServe()
+	errorLog.Fatal(err)
 }
