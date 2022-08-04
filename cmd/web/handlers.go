@@ -33,8 +33,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// Log error with http.Error() to send a generic 500 Internal Server Error
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		app.errorLog.Print(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		app.serverError(w, err)
 		return
 	}
 
@@ -42,8 +41,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// As the response body
 	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
-		app.errorLog.Print(err.Error())
-		http.Error(w, "Internal Server Error", 500)
+		app.serverError(w, err)
 	}
 }
 
@@ -54,7 +52,7 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	// If it can't be converted or value is less than 1, return 404
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
-		http.NotFound(w, r)
+		app.notFound(w)
 		return
 	}
 
@@ -68,8 +66,7 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	// Use r.Method to check if the request is POST
 	if r.Method != "POST" {
 		w.Header().Set("Allow", http.MethodPost)
-		// Use http.Error() to send 405 status code and "Method Not Allowed"
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
 
