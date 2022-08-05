@@ -37,27 +37,12 @@ func main() {
 		infoLog:  infoLog,
 	}
 
-	// Use http.NewServeMux() to init new servemux
-	// Register the home func as the handler for the "/" URL pattern
-	mux := http.NewServeMux()
-
-	// Create file server
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-
-	// Use mux.Handle() to register the file server as the handler for
-	// All URL paths that start with "/static/"
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet/view", app.snippetView)
-	mux.HandleFunc("/snippet/create", app.snippetCreate)
-
 	// Init a new http.Server struct
 	// ErrorLog now uses the custom errorLog logger
 	srv := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,
-		Handler:  mux,
+		Handler:  app.routes(),
 	}
 
 	infoLog.Printf("Starting server on %s", *addr)
