@@ -1,10 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/koller-m/snippetbox/internal/models"
 )
 
 // Define home handler function
@@ -56,9 +59,21 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Use fmt.Fprintf() to interpolate the id value with our response
-	// and write it to http.ResponseWriter
-	fmt.Fprintf(w, "Display a specific snippet with the ID %d...", id)
+	// Use SnippetModel's Get method to retrieve the data for a specific record
+	// Based on its ID
+	// If not found, return a 404 Not Found response
+	snippet, err := app.snippets.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(w)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	// Write the snippet data as a plain-text HTTP response body
+	fmt.Fprintf(w, "%+v", snippet)
 }
 
 // Add snippetCreate handler function
