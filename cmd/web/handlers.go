@@ -29,35 +29,33 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 	}
 
-	for _, snippet := range snippets {
-		fmt.Fprintf(w, "%+v\n", snippet)
-	}
-
 	// Init a slice containing the paths to two files
 	// The file containing the base template must be first
-	// Temp block comment!!!
-	// files := []string{
-	// 	"./ui/html/base.tmpl.html",
-	// 	"./ui/html/partials/nav.tmpl.html",
-	// 	"./ui/html/pages/home.tmpl.html",
-	// }
+	files := []string{
+		"./ui/html/base.tmpl.html",
+		"./ui/html/partials/nav.tmpl.html",
+		"./ui/html/pages/home.tmpl.html",
+	}
 
 	// Use template.ParseFiles() to read the files and store the templates
 	// Log error with http.Error() to send a generic 500 Internal Server Error
-	// Temp block comment!!!
-	// ts, err := template.ParseFiles(files...)
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// 	return
-	// }
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	// Init templateData struct holding slice of snippets
+	data := &templateData{
+		Snippets: snippets,
+	}
 
 	// Use ExecuteTemplate() to write the content of the "base" template
 	// As the response body
-	// Temp block comment!!!
-	// err = ts.ExecuteTemplate(w, "base", nil)
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// }
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
 }
 
 // Add snippetView handler function
