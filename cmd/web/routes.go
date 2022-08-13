@@ -12,6 +12,7 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("/snippet/view", app.snippetView)
 	mux.HandleFunc("/snippet/create", app.snippetCreate)
 
-	// Pass servemux to secureHeaders() middleware
-	return secureHeaders(mux)
+	// Execution flow
+	// recoverPanic - logRequest - secureHeaders - servemux - application handler
+	return app.recoverPanic(app.logRequest(secureHeaders(mux)))
 }
