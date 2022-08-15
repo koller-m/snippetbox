@@ -62,14 +62,28 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Display the form for creating a new snippet..."))
+	data := app.newTemplateData(r)
+
+	app.render(w, http.StatusOK, "create.tmpl.html", data)
 }
 
 func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
-	// Create some variables holding dummy data
-	title := "O snail"
-	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n- Kobayashi Issa"
-	expires := 7
+	// Call r.ParseForm() which adds data to r.PostForm map
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+	}
+
+	// Retrieve title and content from r.PostForm map
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+
+	// Convet expires data to int
+	expires, err := strconv.Atoi(r.PostForm.Get("expires"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
 
 	// Pass the data to the SnippetModel.Insert() method
 	id, err := app.snippets.Insert(title, content, expires)
