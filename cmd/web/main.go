@@ -11,6 +11,7 @@ import (
 	// Import the models package
 	"github.com/koller-m/snippetbox/internal/models"
 
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -20,6 +21,7 @@ type application struct {
 	infoLog       *log.Logger
 	snippets      *models.SnippetModel
 	templateCache map[string]*template.Template
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -55,12 +57,16 @@ func main() {
 	// Init new template cache
 	templateCache, err := newTemplateCache()
 
+	// Init decoder instance
+	formDecoder := form.NewDecoder()
+
 	// Init new instance of our application struct
 	app := &application{
 		errorLog:      errorLog,
 		infoLog:       infoLog,
 		snippets:      &models.SnippetModel{DB: db},
 		templateCache: templateCache,
+		formDecoder:   formDecoder,
 	}
 
 	// Init a new http.Server struct
