@@ -20,6 +20,14 @@ type snippetCreateForm struct {
 	validator.Validator `form:"-"`
 }
 
+// Create userSignupForm struct
+type userSignupForm struct {
+	Name                string `form:"name"`
+	Email               string `form:"email"`
+	Password            string `form:"password"`
+	validator.Validator `form:"-"`
+}
+
 // Define home handler function
 // Writes a byte slice containing
 // "Hello from Snippetbox" as the response body
@@ -120,7 +128,9 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Display an HTML form for signing up a new user...")
+	data := app.newTemplateData(r)
+	data.Form = userSignupForm{}
+	app.render(w, http.StatusOK, "signup.tmpl.html", data)
 }
 
 func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
