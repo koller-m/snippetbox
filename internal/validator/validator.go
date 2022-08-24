@@ -6,9 +6,11 @@ import (
 	"unicode/utf8"
 )
 
+// Add NonFieldErrors for errors not related to a specific form field
 // Define a new Validator type which contains a map of validation errors
 type Validator struct {
-	FieldErrors map[string]string
+	NonFieldErrors []string
+	FieldErrors    map[string]string
 }
 
 // Use regexp.MustCompile() to check format of email address
@@ -18,7 +20,7 @@ var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9
 
 // Valid() returns true if the FieldErrors map is empty
 func (v *Validator) Valid() bool {
-	return len(v.FieldErrors) == 0
+	return len(v.FieldErrors) == 0 && len(v.NonFieldErrors) == 0
 }
 
 // AddFieldError() adds an error message to the FieldErrors map
@@ -31,6 +33,11 @@ func (v *Validator) AddFieldError(key, message string) {
 	if _, exists := v.FieldErrors[key]; !exists {
 		v.FieldErrors[key] = message
 	}
+}
+
+// Adds error messages to NonFieldErrors slice
+func (v *Validator) AddNonFieldError(message string) {
+	v.NonFieldErrors = append(v.NonFieldErrors, message)
 }
 
 // CheckField() adds an error message to the map if a validation check is not ok
